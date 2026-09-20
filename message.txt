@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FixUp.com | Host Discord Bots Like a Pro</title>
+    <meta
+      name="description"
+      content="Deploy and manage Discord bots with file uploads, console access, live logs, and elite infrastructure."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #06131f;
+        --bg-2: #0d1d2f;
+        --surface: rgba(12, 23, 36, 0.7);
+        --surface-strong: rgba(15, 27, 42, 0.9);
+        --card: rgba(12, 20, 32, 0.86);
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #edf4ff;
+        --muted: #b7c7dc;
+        --primary: #7c5cff;
+        --primary-2: #42d4ff;
+        --success: #2ce4a1;
+        --warning: #ffc857;
+        --shadow: 0 24px 80px rgba(2, 10, 18, 0.7);
+        --page-bg: linear-gradient(180deg, #040c14 0%, #071926 100%);
+      }
+
+      body[data-theme="light"] {
+        --bg: #edf3ff;
+        --bg-2: #dfeafc;
+        --surface: rgba(255, 255, 255, 0.82);
+        --surface-strong: rgba(255, 255, 255, 0.96);
+        --card: rgba(255, 255, 255, 0.9);
+        --line: rgba(27, 39, 56, 0.08);
+        --text: #132033;
+        --muted: #52647f;
+        --primary: #5b4df6;
+        --primary-2: #20b8ff;
+        --success: #179c64;
+        --warning: #d78a00;
+        --shadow: 0 24px 80px rgba(25, 48, 84, 0.16);
+        --page-bg: linear-gradient(180deg, #eff5ff 0%, #e9f1ff 100%);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(124, 92, 255, 0.25), transparent 25%),
+          radial-gradient(circle at top right, rgba(66, 212, 255, 0.2), transparent 30%),
+          var(--page-bg);
+        color: var(--text);
+        transition: background 0.25s ease, color 0.25s ease;
+      }
+      img { max-width: 100%; display: block; }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      a { color: inherit; }
+
+      .container { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+      .page-shell { position: relative; min-height: 100vh; overflow: hidden; }
+      .page-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.12;
+        filter: blur(2px);
+        pointer-events: none;
+      }
+      header, main, footer { position: relative; z-index: 1; }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px 0 18px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+      }
+
+      .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        object-fit: cover;
+        display: block;
+        box-shadow: 0 12px 24px rgba(20, 80, 150, 0.3);
+      }
+
+      .nav { display: flex; align-items: center; gap: 28px; }
+      .nav a, .footer-links a { color: rgba(237, 244, 255, 0.72); text-decoration: none; }
+      .nav a:hover, .footer-links a:hover { color: var(--text); }
+
+      .topbar-actions, .cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+      .primary-btn, .secondary-btn, .provider-btn, .auth-mode, .auth-btn {
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 0.88rem 1.2rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: white;
+        box-shadow: 0 18px 34px rgba(124, 92, 255, 0.35);
+      }
+
+      .secondary-btn, .provider-btn, .auth-mode {
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .auth-btn, .provider-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 600;
+      }
+
+      .auth-icon, .provider-icon {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        display: inline-block;
+      }
+
+      .google, .google-logo { width: 22px; height: 22px; }
+      .apple, .apple-logo { color: #10141a; width: 22px; height: 22px; }
+      .discord-logo { color: #5865f2; width: 22px; height: 22px; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+        gap: 52px;
+        padding: 58px 0 42px;
+      }
+      .eyebrow {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--primary-2);
+        margin-bottom: 18px;
+      }
+      .hero-copy h1 {
+        margin: 0;
+        font-size: clamp(2.8rem, 6vw, 5rem);
+        line-height: 0.96;
+        letter-spacing: -0.07em;
+        max-width: 620px;
+      }
+      .hero-copy p, .showcase-copy p, .upload-side p, .feature-card p, .footer-brand p { color: var(--muted); line-height: 1.7; }
+      .hero-copy p { margin: 20px 0 0; max-width: 560px; font-size: 1.06rem; }
+
+      .auth-provider-row { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 12px; }
+      .hero-metrics {
+        list-style: none;
+        padding: 0;
+        margin: 28px 0 0;
+        display: flex;
+        gap: 42px;
+        color: var(--muted);
+      }
+      .hero-metrics li { display: flex; flex-direction: column; gap: 8px; }
+      .hero-metrics strong { font-size: 1.7rem; color: var(--text); }
+
+      .hero-visual { position: relative; display: flex; justify-content: center; min-height: 520px; }
+
+      .glass-card {
+        background: rgba(9, 18, 28, 0.72);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .dashboard-card {
+        width: min(470px, 100%);
+        border-radius: 28px;
+        padding: 18px 18px 14px;
+        position: relative;
+        transform: rotate(4deg);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+        padding: 4px 4px 16px;
+      }
+
+      .online-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 16px rgba(44, 228, 161, 0.8); }
+      .status-pill, .success-tag, .plan-badge {
+        margin-left: auto;
+        padding: 0.4rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .status-pill, .success-tag { background: rgba(44, 228, 161, 0.12); color: #aaf4d3; }
+
+      .app-surface {
+        background: linear-gradient(180deg, rgba(11, 18, 28, 0.95), rgba(7, 12, 16, 0.9));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 22px;
+        padding: 20px;
+      }
+
+      .mini-graph {
+        height: 150px;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        align-items: end;
+        gap: 10px;
+        padding-bottom: 12px;
+      }
+
+      .mini-graph span {
+        display: block;
+        border-radius: 10px 10px 0 0;
+        background: linear-gradient(180deg, var(--primary-2), var(--primary));
+        box-shadow: 0 0 20px rgba(66, 212, 255, 0.15);
+      }
+
+      .stat-boxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 6px; }
+      .stat-boxes div {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 16px 14px;
+      }
+      .stat-boxes small { display: block; color: var(--muted); margin-bottom: 10px; }
+      .stat-boxes strong { font-size: 1.2rem; }
+
+      .floating-panel {
+        position: absolute;
+        right: -8px;
+        bottom: 16px;
+        width: 190px;
+        padding: 16px 18px;
+        border-radius: 20px;
+        transform: rotate(-6deg);
+      }
+
+      .panel-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .tiny-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+      .floating-panel p { margin: 0; font-weight: 600; }
+
+      .brand-strip { padding: 24px 0 12px; }
+      .brand-strip > span {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 16px;
+      }
+      .brand-row { display: flex; gap: 30px; flex-wrap: wrap; color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: -0.04em; }
+
+      .features, .dashboard-showcase, .pricing { padding: 90px 0 20px; }
+      .section-heading { margin-bottom: 32px; }
+      .section-heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.1rem); letter-spacing: -0.06em; }
+      .center { text-align: center; }
+
+      .feature-grid, .pricing-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+      .feature-card, .price-card, .panel { border-radius: 24px; padding: 26px 22px; }
+
+      .feature-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(66, 212, 255, 0.15));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        margin-bottom: 18px;
+        font-size: 1.4rem;
+      }
+
+      .feature-card h3, .price-card h3 { margin: 0 0 12px; font-size: 1.5rem; letter-spacing: -0.05em; }
+
+      .dashboard-showcase { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 34px; align-items: center; }
+      .check-list { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px; }
+      .check-list span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.72rem 0.92rem;
+        border-radius: 999px;
+        color: var(--text);
+      }
+
+      .dashboard-layout { border-radius: 28px; overflow: hidden; }
+      .workspace-tabs {
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--line);
+        padding: 18px 18px 0;
+        display: flex;
+        gap: 10px;
+      }
+      .tab-btn {
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--muted);
+        padding: 0.76rem 1rem;
+        border-radius: 10px 10px 0 0;
+      }
+      .tab-btn.active {
+        background: rgba(124, 92, 255, 0.16);
+        color: var(--text);
+        border-color: rgba(124, 92, 255, 0.26);
+      }
+      .workspace-panel { display: grid; grid-template-columns: 230px 1fr; min-height: 380px; }
+      .file-tree {
+        background: rgba(0, 0, 0, 0.12);
+        border-right: 1px solid var(--line);
+        padding: 18px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        color: var(--muted);
+      }
+      .code-panel { padding: 24px 18px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.92rem; line-height: 1.8; }
+      .code-line { color: #dfeaff; }
+      .comment { color: #79d0b8; }
+      .keyword { color: #8eb7ff; }
+      .string { color: #ffc857; }
+
+      .upload-panel {
+        margin-top: 40px;
+        padding: 32px;
+        border-radius: 32px;
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        align-items: center;
+        gap: 24px;
+      }
+      .upload-area { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .drop-zone, .terminal-box {
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+        border-radius: 24px;
+        min-height: 220px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .drop-zone {
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: var(--muted);
+      }
+      .drop-icon { font-size: 2rem; margin-bottom: 8px; }
+      .terminal-box { padding: 16px; display: flex; flex-direction: column; justify-content: flex-start; }
+      .terminal-top { display: flex; gap: 8px; margin-bottom: 18px; }
+      .terminal-top span { width: 10px; height: 10px; border-radius: 50%; }
+      .terminal-top span:nth-child(1) { background: #ff5f57; }
+      .terminal-top span:nth-child(2) { background: #febc2e; }
+      .terminal-top span:nth-child(3) { background: #28c840; }
+      .terminal-box code { font-family: "SFMono-Regular", Consolas, monospace; color: #dfeaff; line-height: 1.9; }
+
+      .pricing-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .price-card { position: relative; }
+      .plan-name { display: inline-block; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; }
+      .price-card h3 { font-size: 2.6rem; letter-spacing: -0.07em; margin-top: 8px; }
+      .price-card h3 span { font-size: 1rem; color: var(--muted); }
+      .price-card ul { list-style: none; margin: 18px 0 24px; padding: 0; display: grid; gap: 12px; }
+      .featured { border: 1px solid rgba(124, 92, 255, 0.35); background: linear-gradient(180deg, rgba(124, 92, 255, 0.12), rgba(9, 18, 28, 0.84)); }
+      .plan-badge { position: absolute; top: 16px; right: 16px; background: rgba(124, 92, 255, 0.18); color: #d8ceff; }
+
+      .app-shell { padding-top: 60px; }
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .app-header h2 { margin: 0; font-size: clamp(2rem, 3vw, 2.6rem); letter-spacing: -0.06em; }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1.3fr;
+        gap: 22px;
+      }
+      .deploy-form { display: grid; gap: 18px; }
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+      }
+      input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        color: var(--text);
+        padding: 0.8rem 0.9rem;
+      }
+      .upload-label input { padding: 0.8rem; }
+      .file-list { display: flex; flex-wrap: wrap; gap: 8px; }
+      .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(124, 92, 255, 0.12);
+        border: 1px solid rgba(124, 92, 255, 0.25);
+        border-radius: 999px;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.8rem;
+        color: var(--text);
+      }
+      .bot-list { display: grid; gap: 14px; }
+      .bot-card {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 18px;
+        padding: 16px;
+      }
+      .bot-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+      .bot-head h4 { margin: 0; }
+      .bot-status { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 999px; }
+      .status-running { background: rgba(44, 228, 161, 0.12); color: #aaf4d3; }
+      .status-stopped { background: rgba(255, 200, 87, 0.12); color: #ffd680; }
+      .bot-meta { color: var(--muted); font-size: 0.9rem; }
+      .bot-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 8, 15, 0.74);
+        display: grid;
+        place-items: center;
+        z-index: 20;
+      }
+      .modal.hidden, .hidden { display: none !important; }
+      .modal-card {
+        width: min(500px, calc(100% - 32px));
+        border-radius: 24px;
+        padding: 24px;
+        position: relative;
+      }
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        background: transparent;
+        border: 0;
+        color: var(--text);
+        font-size: 2rem;
+        line-height: 1;
+      }
+      .modal-header h3 { margin: 0; font-size: 2rem; letter-spacing: -0.06em; }
+      .auth-toggle-row { display: flex; gap: 12px; margin: 18px 0 18px; }
+      .auth-mode.active { background: rgba(124, 92, 255, 0.12); border-color: rgba(124, 92, 255, 0.3); }
+      .auth-form { display: grid; gap: 18px; }
+      .auth-form label { display: grid; gap: 8px; }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: rgba(14, 22, 31, 0.96);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: var(--text);
+        padding: 0.85rem 1rem;
+        box-shadow: var(--shadow);
+        z-index: 25;
+      }
+
+      .footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 32px 0 60px; }
+      .footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+
+      @media (max-width: 980px) {
+        .hero, .dashboard-showcase, .upload-panel, .dashboard-grid { grid-template-columns: 1fr; }
+        .feature-grid, .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .workspace-panel { grid-template-columns: 1fr; }
+        .file-tree { border-right: none; border-bottom: 1px solid var(--line); }
+      }
+
+      @media (max-width: 720px) {
+        .nav { display: none; }
+        .topbar-actions { display: flex; gap: 8px; }
+        .feature-grid, .pricing-grid, .upload-area { grid-template-columns: 1fr; }
+        .footer { flex-direction: column; align-items: flex-start; }
+      }
+
+      @media (max-width: 540px) {
+        .auth-provider-row { flex-direction: column; }
+        .provider-btn { width: 100%; }
+        .topbar-actions { flex-wrap: wrap; }
+        .price-card, .panel { padding: 24px 18px; }
+      }
+
+      body[data-theme="light"] .glass-card,
+      body[data-theme="light"] .feature-card,
+      body[data-theme="light"] .price-card,
+      body[data-theme="light"] .panel,
+      body[data-theme="light"] .dashboard-card,
+      body[data-theme="light"] .floating-panel,
+      body[data-theme="light"] .upload-panel,
+      body[data-theme="light"] .dashboard-layout,
+      body[data-theme="light"] .modal-card {
+        background: rgba(255, 255, 255, 0.74);
+        border-color: rgba(27, 39, 56, 0.08);
+      }
+
+      body[data-theme="light"] .nav a,
+      body[data-theme="light"] .footer-links a,
+      body[data-theme="light"] .brand-row,
+      body[data-theme="light"] .check-list span,
+      body[data-theme="light"] .file-tree,
+      body[data-theme="light"] .bot-card,
+      body[data-theme="light"] .status-pill,
+      body[data-theme="light"] .success-tag,
+      body[data-theme="light"] .brand,
+      body[data-theme="light"] .secondary-btn,
+      body[data-theme="light"] .provider-btn,
+      body[data-theme="light"] .auth-mode,
+      body[data-theme="light"] .bot-meta,
+      body[data-theme="light"] .file-chip,
+      body[data-theme="light"] .auth-form label,
+      body[data-theme="light"] input {
+        color: var(--text);
+      }
+
+      body[data-theme="light"] .auth-btn,
+      body[data-theme="light"] .provider-btn,
+      body[data-theme="light"] .secondary-btn,
+      body[data-theme="light"] .auth-mode,
+      body[data-theme="light"] input {
+        border-color: rgba(27, 39, 56, 0.08);
+      }
+
+      body[data-theme="light"] .apple, body[data-theme="light"] .apple-logo { color: #0d1117; }
+      body[data-theme="light"] .drop-zone, body[data-theme="light"] .terminal-box { background: rgba(255,255,255,0.08); }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar container">
+        <div class="brand" aria-label="FixUp logo">
+          <img src="fixup-icon.png" alt="FixUp" class="brand-icon" />
+          <span>FixUp</span>
+        </div>
+
+        <nav class="nav">
+          <a href="#features">Features</a>
+          <a href="#dashboard">Dashboard</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#docs">Docs</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button class="secondary-btn auth-btn" type="button" aria-label="Continue with Google">
+            <svg class="auth-icon google" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#EA4335" d="M12 10.2v3.9h5.45c-.24 1.27-.94 2.35-2 3.08l3.23 2.5c1.88-1.73 2.97-4.28 2.97-7.48 0-.7-.06-1.37-.18-2.01H12Z"/>
+              <path fill="#4285F4" d="M12 21.1c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.04.97-3.38.97-2.6 0-4.8-1.75-5.58-4.11H.86v2.6A9.1 9.1 0 0 0 12 21.1Z"/>
+              <path fill="#FBBC05" d="M6.42 17.45A5.7 5.7 0 0 1 6.07 15v-2.6H2.68A9.08 9.08 0 0 0 2.1 12c0 1.46.35 2.84.96 4.08l3.36-2.63Z"/>
+              <path fill="#34A853" d="M12 4.93c1.46 0 2.77.5 3.79 1.49l2.84-2.84A9.07 9.07 0 0 0 12 2.1 9.1 9.1 0 0 0 2.86 8.3L6.22 10.9A5.74 5.74 0 0 1 12 4.93Z"/>
+            </svg>
+            Google
+          </button>
+          <button class="secondary-btn auth-btn" type="button" aria-label="Continue with Apple">
+            <svg class="auth-icon apple" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor" d="M15.72 12.25c0-2.33 1.9-3.45 1.98-3.52-1.08-1.58-2.76-1.8-3.34-1.82-1.42-.15-2.77.84-3.49.84-.72 0-1.82-.82-3-.8-1.54.02-2.96.9-3.75 2.28-1.6 2.78-.41 6.86 1.14 9.1.75 1.08 1.66 2.3 2.87 2.26 1.14-.04 1.57-.74 2.95-.74 1.38 0 1.77.74 2.98.71 1.23-.02 2-.99 2.76-2.08.87-1.27 1.23-2.49 1.25-2.56-.03-.01-2.39-.92-3.81-3.57ZM14.54 6.64c.6-.73 1-1.75.89-2.77-.86.04-1.91.58-2.53 1.3-.56.65-1.05 1.7-.92 2.7.98.08 1.96-.49 2.56-1.23Z"/>
+            </svg>
+            Apple
+          </button>
+          <button id="theme-toggle" class="secondary-btn" type="button" aria-label="Toggle theme">🌙</button>
+          <button id="open-signin" class="primary-btn" type="button">Start free</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero container">
+          <div class="hero-copy">
+            <span class="eyebrow">Powering next-gen bot infrastructure</span>
+            <h1>Host, scale, and ship Discord bots with zero friction.</h1>
+            <p>
+              Upload your project files, run console commands, monitor logs, and keep your bot online with a platform built for serious creators.
+            </p>
+
+            <div class="cta-row">
+              <button id="hero-signup" class="primary-btn" type="button">Deploy a bot</button>
+              <button class="secondary-btn">View docs</button>
+            </div>
+
+            <div class="auth-provider-row">
+              <button class="provider-btn provider-login" type="button" data-provider="google" aria-label="Continue with Google">
+                <svg class="provider-icon google-logo" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#EA4335" d="M12 10.2v3.9h5.45c-.24 1.27-.94 2.35-2 3.08l3.23 2.5c1.88-1.73 2.97-4.28 2.97-7.48 0-.7-.06-1.37-.18-2.01H12Z"/>
+                  <path fill="#4285F4" d="M12 21.1c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.04.97-3.38.97-2.6 0-4.8-1.75-5.58-4.11H.86v2.6A9.1 9.1 0 0 0 12 21.1Z"/>
+                  <path fill="#FBBC05" d="M6.42 17.45A5.7 5.7 0 0 1 6.07 15v-2.6H2.68A9.08 9.08 0 0 0 2.1 12c0 1.46.35 2.84.96 4.08l3.36-2.63Z"/>
+                  <path fill="#34A853" d="M12 4.93c1.46 0 2.77.5 3.79 1.49l2.84-2.84A9.07 9.07 0 0 0 12 2.1 9.1 9.1 0 0 0 2.86 8.3L6.22 10.9A5.74 5.74 0 0 1 12 4.93Z"/>
+                </svg>
+                Continue with Google
+              </button>
+              <button class="provider-btn provider-login" type="button" data-provider="apple" aria-label="Continue with Apple">
+                <svg class="provider-icon apple-logo" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M15.72 12.25c0-2.33 1.9-3.45 1.98-3.52-1.08-1.58-2.76-1.8-3.34-1.82-1.42-.15-2.77.84-3.49.84-.72 0-1.82-.82-3-.8-1.54.02-2.96.9-3.75 2.28-1.6 2.78-.41 6.86 1.14 9.1.75 1.08 1.66 2.3 2.87 2.26 1.14-.04 1.57-.74 2.95-.74 1.38 0 1.77.74 2.98.71 1.23-.02 2-.99 2.76-2.08.87-1.27 1.23-2.49 1.25-2.56-.03-.01-2.39-.92-3.81-3.57ZM14.54 6.64c.6-.73 1-1.75.89-2.77-.86.04-1.91.58-2.53 1.3-.56.65-1.05 1.7-.92 2.7.98.08 1.96-.49 2.56-1.23Z"/>
+                </svg>
+                Continue with Apple
+              </button>
+              <button class="provider-btn provider-login" type="button" data-provider="discord" aria-label="Continue with Discord">
+                <svg class="provider-icon discord-logo" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M20.4 4.4a16.4 16.4 0 0 0-4.08-1.25l-.17.33c1.57.38 2.97 1 4.25 2.02a13.6 13.6 0 0 0-10.8 0A12.95 12.95 0 0 0 14.7 3.5l-.17-.33A16.42 16.42 0 0 0 3.6 4.4a16.9 16.9 0 0 0-2.4 10.2c1.22 1.2 2.77 2.1 4.57 2.7l.8-1.08a9.7 9.7 0 0 1-1.53-.73l.37-.27a12.1 12.1 0 0 0 10.8 0l.37.27a9.7 9.7 0 0 1-1.53.73l.8 1.08a16.7 16.7 0 0 0 4.57-2.7 16.9 16.9 0 0 0-2.4-10.2ZM9.5 14.3c-.84 0-1.53-.77-1.53-1.72S8.66 10.86 9.5 10.86s1.53.77 1.53 1.72-.69 1.72-1.53 1.72Zm5 0c-.84 0-1.53-.77-1.53-1.72s.69-1.72 1.53-1.72 1.53.77 1.53 1.72-.69 1.72-1.53 1.72Z"/>
+                </svg>
+                Continue with Discord
+              </button>
+            </div>
+
+            <ul class="hero-metrics">
+              <li><strong>99.9%</strong><span>uptime</span></li>
+              <li><strong>2.4s</strong><span>deploy time</span></li>
+              <li><strong>24/7</strong><span>monitoring</span></li>
+            </ul>
+          </div>
+
+          <div class="hero-visual">
+            <div class="dashboard-card glass-card">
+              <div class="card-header">
+                <span class="online-dot"></span>
+                <span>NightWatch v3.8</span>
+                <span class="status-pill">Running</span>
+              </div>
+
+              <div class="app-surface">
+                <div class="mini-graph">
+                  <span style="height: 30%"></span>
+                  <span style="height: 54%"></span>
+                  <span style="height: 68%"></span>
+                  <span style="height: 52%"></span>
+                  <span style="height: 72%"></span>
+                  <span style="height: 90%"></span>
+                  <span style="height: 100%"></span>
+                </div>
+
+                <div class="stat-boxes">
+                  <div>
+                    <small>CPU</small>
+                    <strong>18%</strong>
+                  </div>
+                  <div>
+                    <small>Memory</small>
+                    <strong>1.2 GB</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="floating-panel glass-card">
+              <div class="panel-top">
+                <span class="tiny-label">Deployment</span>
+                <span class="success-tag">Live</span>
+              </div>
+              <p>git push origin main</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="brand-strip container">
+          <span>Trusted by teams building</span>
+          <div class="brand-row">
+            <span>Discord Labs</span>
+            <span>GuildPilot</span>
+            <span>NovaBot</span>
+            <span>CommandFlow</span>
+          </div>
+        </section>
+
+        <section id="features" class="features container">
+          <div class="section-heading">
+            <span class="eyebrow">Everything your bot needs</span>
+            <h2>Built for serious bot developers.</h2>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card glass-card">
+              <div class="feature-icon">⬢</div>
+              <h3>File-based deploys</h3>
+              <p>Upload your project files, install dependencies, and deploy with a single click.</p>
+            </article>
+
+            <article class="feature-card glass-card">
+              <div class="feature-icon">⌘</div>
+              <h3>Console access</h3>
+              <p>Run commands, install packages, and test your bot directly inside the panel.</p>
+            </article>
+
+            <article class="feature-card glass-card">
+              <div class="feature-icon">◌</div>
+              <h3>Live logs</h3>
+              <p>Stream console output in real time and instantly catch errors before users do.</p>
+            </article>
+
+            <article class="feature-card glass-card">
+              <div class="feature-icon">✦</div>
+              <h3>Smart scaling</h3>
+              <p>Scale bot resources automatically to match traffic spikes and server growth.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="dashboard" class="dashboard-showcase container">
+          <div class="showcase-copy">
+            <span class="eyebrow">Control center</span>
+            <h2>One dashboard. Every command. Zero clutter.</h2>
+            <p>
+              Keep your bot projects, environment variables, command logs, and deployments in one professional workspace built for shipping fast.
+            </p>
+
+            <div class="check-list">
+              <span>Instant console startup</span>
+              <span>Secure environment variables</span>
+              <span>Version control friendly</span>
+              <span>Crash + error detection</span>
+            </div>
+          </div>
+
+          <div class="dashboard-layout glass-card">
+            <div class="workspace-tabs">
+              <button class="tab-btn active">Files</button>
+              <button class="tab-btn">Console</button>
+              <button class="tab-btn">Deploy</button>
+            </div>
+
+            <div class="workspace-panel">
+              <div class="file-tree">
+                <span>src/</span>
+                <span>commands/</span>
+                <span>events/</span>
+                <span>index.js</span>
+                <span>.env</span>
+              </div>
+
+              <div class="code-panel">
+                <div class="code-line"><span class="comment">// index.js</span></div>
+                <div class="code-line"><span class="keyword">const</span> { Client } = <span class="string">'discord.js'</span>;</div>
+                <div class="code-line"><span class="keyword">const</span> client = <span class="keyword">new</span> Client({ intents: [...] });</div>
+                <div class="code-line">client.on(<span class="string">'ready'</span>, () => console.log(<span class="string">'Bot online'</span>));</div>
+                <div class="code-line">client.login(process.env.DISCORD_TOKEN);</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="upload-panel container glass-card">
+          <div class="upload-side">
+            <span class="eyebrow">Deploy in seconds</span>
+            <h2>Upload files or use the terminal.</h2>
+            <p>Choose your workflow. Either drag in your project, or paste commands into the built-in console.</p>
+          </div>
+
+          <div class="upload-area">
+            <div class="drop-zone">
+              <div class="drop-icon">⇪</div>
+              <p>Drop files here</p>
+              <span>or select project folder</span>
+            </div>
+            <div class="terminal-box">
+              <div class="terminal-top">
+                <span></span><span></span><span></span>
+              </div>
+              <code>$ npm install
+$ node index.js</code>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" class="pricing container">
+          <div class="section-heading center">
+            <span class="eyebrow">Simple pricing</span>
+            <h2>Choose a plan that fits your bot.</h2>
+          </div>
+
+          <div class="pricing-grid">
+            <article class="price-card glass-card">
+              <span class="plan-name">Free</span>
+              <h3>$0<span>/mo</span></h3>
+              <ul>
+                <li>1 bot</li>
+                <li>3GB storage</li>
+                <li>Basic logs</li>
+              </ul>
+              <button class="secondary-btn">Try free</button>
+            </article>
+
+            <article class="price-card glass-card">
+              <span class="plan-name">Launch</span>
+              <h3>$7<span>/mo</span></h3>
+              <ul>
+                <li>3 active bots</li>
+                <li>15GB storage</li>
+                <li>Live logs</li>
+              </ul>
+              <button class="secondary-btn">Get started</button>
+            </article>
+
+            <article class="price-card featured glass-card">
+              <span class="plan-badge">Most popular</span>
+              <span class="plan-name">Growth</span>
+              <h3>$19<span>/mo</span></h3>
+              <ul>
+                <li>Unlimited bots</li>
+                <li>Priority deploys</li>
+                <li>Monitoring + alerts</li>
+              </ul>
+              <button class="primary-btn">Launch now</button>
+            </article>
+
+            <article class="price-card glass-card">
+              <span class="plan-name">Scale</span>
+              <h3>$39<span>/mo</span></h3>
+              <ul>
+                <li>Team access</li>
+                <li>Priority support</li>
+                <li>Private infrastructure</li>
+              </ul>
+              <button class="secondary-btn">Talk to sales</button>
+            </article>
+          </div>
+        </section>
+
+        <section id="app-shell" class="app-shell container hidden">
+          <div class="app-header">
+            <div>
+              <span class="eyebrow">FixUp.com</span>
+              <h2>Bot dashboard</h2>
+            </div>
+            <button id="logout-btn" class="secondary-btn" type="button">Log out</button>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="panel glass-card">
+              <div class="panel-head">
+                <h3>Deploy a bot</h3>
+              </div>
+
+              <form id="deploy-form" class="deploy-form">
+                <label>
+                  Bot name
+                  <input id="bot-name" type="text" placeholder="My Bot" required />
+                </label>
+
+                <label>
+                  Start command
+                  <input id="bot-command" type="text" value="node index.js" />
+                </label>
+
+                <label class="upload-label">
+                  Project files
+                  <input id="bot-files" type="file" multiple />
+                </label>
+
+                <div id="file-list" class="file-list"></div>
+
+                <button class="primary-btn" type="submit">Deploy bot</button>
+              </form>
+            </div>
+
+            <div class="panel glass-card">
+              <div class="panel-head">
+                <h3>Hosted bots</h3>
+              </div>
+              <div id="bot-list" class="bot-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer id="docs" class="footer container">
+        <div class="footer-brand">
+          <div class="brand" aria-label="FixUp logo">
+            <img src="fixup-icon.png" alt="FixUp" class="brand-icon" />
+            <span>FixUp</span>
+          </div>
+          <p>Professional bot hosting for builders, teams, and creators.</p>
+        </div>
+
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#dashboard">Dashboard</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#docs">Docs</a>
+        </div>
+      </footer>
+    </div>
+
+    <div id="auth-modal" class="modal hidden" aria-modal="true" role="dialog">
+      <div class="modal-card glass-card">
+        <button id="close-auth" class="close-btn" type="button" aria-label="Close">×</button>
+        <div class="modal-header">
+          <span class="eyebrow">FixUp.com</span>
+          <h3 id="auth-title">Sign in</h3>
+        </div>
+
+        <div class="auth-toggle-row">
+          <button class="auth-mode active" data-mode="signin" type="button">Sign in</button>
+          <button class="auth-mode" data-mode="signup" type="button">Sign up</button>
+        </div>
+
+        <form id="auth-form" class="auth-form">
+          <label>
+            Name
+            <input id="auth-name" type="text" placeholder="Your name" />
+          </label>
+          <label>
+            Email
+            <input id="auth-email" type="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Password
+            <input id="auth-password" type="password" placeholder="••••••••" required minlength="6" />
+          </label>
+          <button class="primary-btn" type="submit">Continue</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script>
+      const STORAGE_KEYS = {
+        users: 'botforge_users',
+        currentUser: 'botforge_current_user',
+        bots: 'botforge_bots'
+      };
+
+      const state = {
+        authMode: 'signin',
+        selectedFiles: []
+      };
+
+      const getUsers = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || '[]');
+      const setUsers = (users) => localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+      const getCurrentUser = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+      const setCurrentUser = (user) => localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+      const getBots = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.bots) || '[]');
+      const setBots = (bots) => localStorage.setItem(STORAGE_KEYS.bots, JSON.stringify(bots));
+
+      const showToast = (message) => {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2600);
+      };
+
+      const resetAuthForm = () => {
+        const name = document.getElementById('auth-name');
+        const email = document.getElementById('auth-email');
+        const pass = document.getElementById('auth-password');
+        if (name) name.value = '';
+        if (email) email.value = '';
+        if (pass) pass.value = '';
+      };
+
+      const openAuthModal = (mode = 'signin') => {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        state.authMode = mode;
+        const title = document.getElementById('auth-title');
+        const nameField = document.getElementById('auth-name');
+
+        if (title) title.textContent = mode === 'signup' ? 'Sign up' : 'Sign in';
+        if (nameField) nameField.style.display = mode === 'signup' ? 'grid' : 'none';
+
+        document.querySelectorAll('.auth-mode').forEach((button) => {
+          button.classList.toggle('active', button.dataset.mode === mode);
+        });
+
+        modal.classList.remove('hidden');
+      };
+
+      const closeAuthModal = () => {
+        const modal = document.getElementById('auth-modal');
+        if (modal) modal.classList.add('hidden');
+        resetAuthForm();
+      };
+
+      const setTheme = (theme) => {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('botforge-theme', theme);
+        const toggle = document.getElementById('theme-toggle');
+        if (toggle) toggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+      };
+
+      const providerLogin = (provider) => {
+        const displayName = {
+          google: 'Google User',
+          apple: 'Apple User',
+          discord: 'Discord User'
+        }[provider] || 'User';
+
+        const email = `${provider}@botforge.com`;
+        const users = getUsers();
+        let user = users.find((entry) => entry.email === email);
+
+        if (!user) {
+          user = {
+            id: crypto.randomUUID(),
+            name: displayName,
+            email,
+            password: 'provider-auth',
+            provider
+          };
+          users.push(user);
+          setUsers(users);
+        }
+
+        setCurrentUser(user);
+        renderLoggedInState();
+        closeAuthModal();
+        showToast(`Signed in with ${provider}`);
+      };
+
+      const handleAuthSubmit = (event) => {
+        event.preventDefault();
+        const name = document.getElementById('auth-name')?.value.trim() || '';
+        const email = document.getElementById('auth-email')?.value.trim() || '';
+        const password = document.getElementById('auth-password')?.value.trim() || '';
+
+        if (!email || !password) {
+          showToast('Please fill in all required fields.');
+          return;
+        }
+
+        const users = getUsers();
+
+        if (state.authMode === 'signup') {
+          if (users.some((user) => user.email.toLowerCase() === email.toLowerCase())) {
+            showToast('An account with this email already exists.');
+            return;
+          }
+
+          const user = {
+            id: crypto.randomUUID(),
+            name: name || 'New user',
+            email,
+            password,
+            provider: 'local'
+          };
+
+          users.push(user);
+          setUsers(users);
+          setCurrentUser(user);
+          renderLoggedInState();
+          closeAuthModal();
+          showToast('Account created!');
+          return;
+        }
+
+        const user = users.find((entry) => entry.email.toLowerCase() === email.toLowerCase() && entry.password === password);
+        if (!user) {
+          showToast('Incorrect email or password.');
+          return;
+        }
+
+        setCurrentUser(user);
+        renderLoggedInState();
+        closeAuthModal();
+        showToast('Signed in successfully.');
+      };
+
+      const renderLoggedInState = () => {
+        const user = getCurrentUser();
+        const appShell = document.getElementById('app-shell');
+        const pageButtons = document.querySelectorAll('.provider-login, #open-signin, #hero-signup');
+
+        pageButtons.forEach((button) => {
+          button.disabled = !!user;
+          button.style.opacity = user ? '0.7' : '1';
+        });
+
+        if (user) {
+          if (appShell) appShell.classList.remove('hidden');
+          document.documentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const appPanel = document.getElementById('app-shell');
+          if (appPanel) appPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          if (appShell) appShell.classList.add('hidden');
+        }
+
+        renderBots();
+      };
+
+      const renderBots = () => {
+        const list = document.getElementById('bot-list');
+        const bots = getBots();
+        const user = getCurrentUser();
+
+        if (!list) return;
+        if (!user) {
+          list.innerHTML = '<p class="empty-state">Log in to deploy your first bot.</p>';
+          return;
+        }
+
+        const userBots = bots.filter((bot) => bot.ownerId === user.id);
+
+        if (!userBots.length) {
+          list.innerHTML = '<div class="empty-state">No bots deployed yet. Upload your project files and deploy your first bot.</div>';
+          return;
+        }
+
+        list.innerHTML = userBots.map((bot) => `
+          <div class="bot-card">
+            <div class="bot-head">
+              <h4>${bot.name}</h4>
+              <span class="bot-status ${bot.running ? 'status-running' : 'status-stopped'}">${bot.running ? 'Running' : 'Stopped'}</span>
+            </div>
+            <div class="bot-meta">Command: ${bot.command}</div>
+            <div class="bot-meta">Files: ${bot.files.length}</div>
+            <div class="bot-meta">Deployment ID: ${bot.id.slice(0, 8)}</div>
+            <div class="bot-actions">
+              <button class="secondary-btn" type="button" data-action="toggle" data-id="${bot.id}">${bot.running ? 'Stop' : 'Start'}</button>
+              <button class="secondary-btn" type="button" data-action="logs" data-id="${bot.id}">Logs</button>
+              <button class="secondary-btn danger" type="button" data-action="delete" data-id="${bot.id}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      };
+
+      const handleDeploySubmit = (event) => {
+        event.preventDefault();
+        const user = getCurrentUser();
+        if (!user) {
+          showToast('Please sign in first.');
+          return;
+        }
+
+        const name = document.getElementById('bot-name').value.trim();
+        const command = document.getElementById('bot-command').value.trim() || 'node index.js';
+
+        if (!name) {
+          showToast('Give your bot a name.');
+          return;
+        }
+
+        const bots = getBots();
+        const newBot = {
+          id: crypto.randomUUID(),
+          ownerId: user.id,
+          name,
+          command,
+          files: state.selectedFiles.map((file) => ({
+            name: file.name,
+            size: file.size,
+            type: file.type || 'unknown'
+          })),
+          running: true,
+          createdAt: new Date().toISOString()
+        };
+
+        bots.push(newBot);
+        setBots(bots);
+        renderBots();
+        event.target.reset();
+        state.selectedFiles = [];
+        const fileList = document.getElementById('file-list');
+        if (fileList) fileList.innerHTML = '';
+        showToast('Bot deployed successfully.');
+      };
+
+      const updateSelectedFiles = (files) => {
+        const list = document.getElementById('file-list');
+        state.selectedFiles = Array.from(files || []);
+
+        if (!list) return;
+
+        if (!state.selectedFiles.length) {
+          list.innerHTML = '<span class="file-chip">No files selected</span>';
+          return;
+        }
+
+        list.innerHTML = state.selectedFiles.map((file) => `
+          <span class="file-chip">${file.name}</span>
+        `).join('');
+      };
+
+      const handleBotActions = (event) => {
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) return;
+
+        const { action, id } = actionButton.dataset;
+        const bots = getBots();
+        const index = bots.findIndex((bot) => bot.id === id);
+
+        if (index === -1) return;
+
+        if (action === 'toggle') {
+          bots[index].running = !bots[index].running;
+          showToast(`${bots[index].name} ${bots[index].running ? 'started' : 'stopped'}.`);
+        }
+
+        if (action === 'logs') {
+          const bot = bots[index];
+          showToast(`${bot.name}: ${bot.running ? 'Bot is online and ready.' : 'Bot is stopped.'}`);
+        }
+
+        if (action === 'delete') {
+          bots.splice(index, 1);
+          showToast('Bot removed.');
+        }
+
+        setBots(bots);
+        renderBots();
+      };
+
+      const logout = () => {
+        localStorage.removeItem(STORAGE_KEYS.currentUser);
+        renderLoggedInState();
+        showToast('Logged out.');
+      };
+
+      const init = () => {
+        const savedTheme = localStorage.getItem('botforge-theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.auth-mode').forEach((button) => {
+          button.addEventListener('click', () => {
+            state.authMode = button.dataset.mode;
+            openAuthModal(state.authMode);
+          });
+        });
+
+        const authForm = document.getElementById('auth-form');
+        if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
+
+        const closeAuthButton = document.getElementById('close-auth');
+        if (closeAuthButton) closeAuthButton.addEventListener('click', closeAuthModal);
+
+        const openSigninButton = document.getElementById('open-signin');
+        if (openSigninButton) openSigninButton.addEventListener('click', () => openAuthModal('signup'));
+
+        const heroSignupButton = document.getElementById('hero-signup');
+        if (heroSignupButton) heroSignupButton.addEventListener('click', () => openAuthModal('signup'));
+
+        const logoutButton = document.getElementById('logout-btn');
+        if (logoutButton) logoutButton.addEventListener('click', logout);
+
+        const deployForm = document.getElementById('deploy-form');
+        if (deployForm) deployForm.addEventListener('submit', handleDeploySubmit);
+
+        const botFilesInput = document.getElementById('bot-files');
+        if (botFilesInput) botFilesInput.addEventListener('change', (event) => updateSelectedFiles(event.target.files));
+
+        const botList = document.getElementById('bot-list');
+        if (botList) botList.addEventListener('click', handleBotActions);
+
+        document.querySelectorAll('.provider-login').forEach((button) => {
+          button.addEventListener('click', () => providerLogin(button.dataset.provider));
+        });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(nextTheme);
+          });
+        }
+
+        document.querySelectorAll('.tab-btn').forEach((button) => {
+          button.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+          });
+        });
+
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) {
+          authModal.addEventListener('click', (event) => {
+            if (event.target.id === 'auth-modal') closeAuthModal();
+          });
+        }
+
+        renderLoggedInState();
+        updateSelectedFiles([]);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
